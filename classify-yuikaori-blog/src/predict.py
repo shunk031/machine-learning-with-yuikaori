@@ -11,8 +11,8 @@ DATA_DIR = os.path.join(os.path.dirname(os.path.abspath('__file__')), '../data/t
 
 if __name__ == '__main__':
 
-    testdata_filename = "ogurayui-0815_2017-01-05_AKIBA'S TRIP☆.csv"
-    # testdata_filename = "ishiharakaori-0806_2017-01-06_ステキ☆.csv"
+    # testdata_filename = "ogurayui-0815_2017-01-05_AKIBA'S TRIP☆.csv"
+    testdata_filename = "ishiharakaori-0806_2017-01-06_ステキ☆.csv"
 
     # テストデータの読み込み
     with open(os.path.join(DATA_DIR, testdata_filename), 'r') as rf:
@@ -47,4 +47,8 @@ if __name__ == '__main__':
 
     # テストデータの予測
     pred = svm_est.predict(X_test_tfidf)
-    print(pred)
+
+    if pred == 0:
+        print("Predict: input article is ISHIHARA Kaori's blog.")
+    else:
+        print("Predict: input article is OGURA Yui's blog.")

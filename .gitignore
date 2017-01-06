@@ -3,5 +3,6 @@
 *.csv
 *.jpg
 *.png
+*.pkl
 
 .ipynb_checkpoints/

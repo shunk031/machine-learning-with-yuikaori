@@ -4,5 +4,6 @@
 *.jpg
 *.png
 *.pkl
+*.html
 
 .ipynb_checkpoints/

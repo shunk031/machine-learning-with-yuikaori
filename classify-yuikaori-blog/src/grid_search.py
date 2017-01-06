@@ -3,6 +3,8 @@
 import MeCab
 import pickle
 import os
+import pandas as pd
+import random
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -10,60 +12,37 @@ from sklearn import svm
 from sklearn.grid_search import GridSearchCV
 from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
-
+from sklearn.externals import joblib
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.abspath('__file__')), '../data/blog-articles')
 
-
-def make_wakati_list(blog_data):
-    mt = MeCab.Tagger("-Ochasen -d /usr/lib/mecab/dic/mecab-ipadic-neologd")
-    mt.parse('')
-
-    wakati_list = []
-    for blog_dict in blog_data:
-        for article_list in blog_dict.values():
-            wakati_tokens = []
-            for sentence in article_list:
-                node = mt.parseToNode(sentence)
-                while node:
-                    pos = node.feature.split(",")[0]
-                    if pos == "名詞":
-                        # print(node.surface)
-                        wakati_tokens.append(node.surface)
-                    node = node.next
-
-            wakati_list.append(' '.join(wakati_tokens))
-
-    return wakati_list
-
-
 if __name__ == '__main__':
 
-    with open(os.path.join(DATA_DIR, 'ogurayui-blog.pkl'), 'rb') as rf:
-        yui_blog_data = pickle.load(rf)
+    # ブログデータの読み込み
+    df = pd.read_csv(os.path.join(DATA_DIR, 'wakati-tokens.csv'))
+    kaori_data = df[df['label'] == 'kaori']
+    num_of_kaori_data = len(kaori_data)
+    yui_data = df[df['label'] == 'yui']
+    yui_data = yui_data.iloc[random.sample(list(yui_data.index), num_of_kaori_data)]
 
-    with open(os.path.join(DATA_DIR, 'ishiharakaori-blog.pkl'), 'rb') as rf:
-        kaori_blog_data = pickle.load(rf)
-
-    # ブログ記事を分かち書き
-    print('Now wakatigaking...')
-    yui_wakati = make_wakati_list(yui_blog_data)
-    kaori_wakati = make_wakati_list(kaori_blog_data)
-
-    X = yui_wakati + kaori_wakati
-    y = ['yui'] * len(yui_wakati) + ['kaori'] * len(kaori_wakati)
+    df = pd.concat([yui_data, kaori_data])
 
     # クラスラベル'yui'と'kaori'を整数値に変更
     class_le = LabelEncoder()
-    y = class_le.fit_transform(y)
+    y = class_le.fit_transform(df['label'].values)
 
-    print('split into train data and test data')
+    X = df['article'].values
+
+    print('Split into train data and test data...')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+    # print('X train data:\n{}'.format(X_train))
+    # print('X test data:\n{}'.format(X_test))
 
     # 学習データを用いてTF-IDFを計算
     tfidf_vec = TfidfVectorizer()
     tfidf_vec.fit(X_train)
     X_train_tfidf = tfidf_vec.transform(X_train)
+    # print(X_train_tfidf)
     X_test_tfidf = tfidf_vec.transform(X_test)
 
     # Grid searchでチューニングするハイパーパラメータを設定
@@ -75,7 +54,8 @@ if __name__ == '__main__':
         }
     ]
 
-    scores = ['accuracy', 'precision', 'recall']
+    # scores = ['accuracy', 'precision', 'recall']
+    scores = ['accuracy']
     for score in scores:
         print('\n' + '=' * 50)
         print(score)
@@ -94,3 +74,13 @@ if __name__ == '__main__':
         print("\n+ テストデータでの識別結果:\n")
         y_true, y_pred = y_test, clf.predict(X_test_tfidf)
         print(classification_report(y_true, y_pred))
+
+    # TF-IDFモデルをdump
+    print('Dump TF-IDF vectorizer model to "tfidf.pkl"')
+    with open("tfidf.pkl", 'wb') as wf:
+        pickle.dump(tfidf_vec, wf)
+    # joblib.dump(tfidf_vec, 'tfidf.pkl', compress=1)
+
+    # チューニングしたモデルをdump
+    print('Dump best estimator model to "gridsearch_svm.pkl"')
+    joblib.dump(clf.best_estimator_, 'gridsearch_svm.pkl', compress=1)

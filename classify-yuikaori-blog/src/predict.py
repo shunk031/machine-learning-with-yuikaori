@@ -6,7 +6,7 @@ import MeCab
 
 from sklearn.externals import joblib
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath('__file__')), '../data/test')
+TESTDATA_DIR = os.path.join(os.path.dirname(os.path.abspath('__file__')), '../data/test')
 
 
 if __name__ == '__main__':
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     testdata_filename = "ishiharakaori-0806_2017-01-06_ステキ☆.csv"
 
     # テストデータの読み込み
-    with open(os.path.join(DATA_DIR, testdata_filename), 'r') as rf:
+    with open(os.path.join(TESTDATA_DIR, testdata_filename), 'r') as rf:
         reader = csv.reader(rf)
         blog_sentences = [row[2] for row in reader]
 

@@ -14,12 +14,12 @@ from sklearn.cross_validation import train_test_split
 from sklearn.metrics import classification_report
 from sklearn.externals import joblib
 
-DATA_DIR = os.path.join(os.path.dirname(os.path.abspath('__file__')), '../data/blog-articles')
+PREPROCESSED_DIR = os.path.join(os.path.dirname(os.path.abspath('__file__')), '../data/blog-articles')
 
 if __name__ == '__main__':
 
     # ブログデータの読み込み
-    df = pd.read_csv(os.path.join(DATA_DIR, 'wakati-tokens.csv'))
+    df = pd.read_csv(os.path.join(PREPROCESSED_DIR, 'wakati-tokens.csv'))
     kaori_data = df[df['label'] == 'kaori']
     num_of_kaori_data = len(kaori_data)
     yui_data = df[df['label'] == 'yui']

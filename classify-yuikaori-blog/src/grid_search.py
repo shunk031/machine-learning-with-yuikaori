@@ -20,16 +20,16 @@ if __name__ == '__main__':
 
     # ブログデータの読み込み
     df = pd.read_csv(os.path.join(PREPROCESSED_DIR, 'wakati-tokens.csv'))
-    kaori_data = df[df['label'] == 'kaori']
+    kaori_data = df[df['classlabel'] == 'kaori']
     num_of_kaori_data = len(kaori_data)
-    yui_data = df[df['label'] == 'yui']
+    yui_data = df[df['classlabel'] == 'yui']
     yui_data = yui_data.iloc[random.sample(list(yui_data.index), num_of_kaori_data)]
 
     df = pd.concat([yui_data, kaori_data])
 
     # クラスラベル'yui'と'kaori'を整数値に変更
     class_le = LabelEncoder()
-    y = class_le.fit_transform(df['label'].values)
+    y = class_le.fit_transform(df['classlabel'].values)
 
     X = df['article'].values
 
